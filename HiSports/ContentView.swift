@@ -6,16 +6,31 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            homeView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+            
+            // 🌟 Ikon diubah jadi figure.run biar gak kembar sama Profile
+            ActivityView()
+                .tabItem {
+                    Label("Activity", systemImage: "figure.run")
+                }
+
+            profileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+            
         }
-        .padding()
+        // 🌟 FORCE LOGOUT SEKALI SAAT APPS DIJALANKAN
+        .onAppear {
+        }
     }
 }
 

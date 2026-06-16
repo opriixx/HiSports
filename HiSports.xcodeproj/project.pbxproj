@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0D6569B52FE0642B009C9410 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6569B42FE0642B009C9410 /* FirebaseAnalytics */; };
+		0D6569B72FE0642B009C9410 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6569B62FE0642B009C9410 /* FirebaseAuth */; };
+		0D6569B92FE0642B009C9410 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6569B82FE0642B009C9410 /* FirebaseFirestore */; };
+		0D656A132FE13431009C9410 /* File.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0D656A122FE13431009C9410 /* File.txt */; };
+		0D656A872FE16E46009C9410 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 0D656A862FE16E46009C9410 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0DB994F42FD96359001AAAF4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D656A122FE13431009C9410 /* File.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = File.txt; sourceTree = "<group>"; };
 		0DB994E62FD96357001AAAF4 /* HiSports.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HiSports.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DB994F32FD96359001AAAF4 /* HiSportsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HiSportsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DB994FD2FD96359001AAAF4 /* HiSportsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HiSportsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +61,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D6569B52FE0642B009C9410 /* FirebaseAnalytics in Frameworks */,
+				0D656A872FE16E46009C9410 /* FirebaseStorage in Frameworks */,
+				0D6569B72FE0642B009C9410 /* FirebaseAuth in Frameworks */,
+				0D6569B92FE0642B009C9410 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +85,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0D656A852FE16E3F009C9410 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		0DB994DD2FD96357001AAAF4 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +99,8 @@
 				0DB994F62FD96359001AAAF4 /* HiSportsTests */,
 				0DB995002FD96359001AAAF4 /* HiSportsUITests */,
 				0DB994E72FD96357001AAAF4 /* Products */,
+				0D656A122FE13431009C9410 /* File.txt */,
+				0D656A852FE16E3F009C9410 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +134,10 @@
 			);
 			name = HiSports;
 			packageProductDependencies = (
+				0D6569B42FE0642B009C9410 /* FirebaseAnalytics */,
+				0D6569B62FE0642B009C9410 /* FirebaseAuth */,
+				0D6569B82FE0642B009C9410 /* FirebaseFirestore */,
+				0D656A862FE16E46009C9410 /* FirebaseStorage */,
 			);
 			productName = HiSports;
 			productReference = 0DB994E62FD96357001AAAF4 /* HiSports.app */;
@@ -195,6 +221,9 @@
 			);
 			mainGroup = 0DB994DD2FD96357001AAAF4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0DB994E72FD96357001AAAF4 /* Products */;
 			projectDirPath = "";
@@ -212,6 +241,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D656A132FE13431009C9410 /* File.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,6 +608,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0D6569B42FE0642B009C9410 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		0D6569B62FE0642B009C9410 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		0D6569B82FE0642B009C9410 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		0D656A862FE16E46009C9410 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D6569B32FE0642B009C9410 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0DB994DE2FD96357001AAAF4 /* Project object */;
 }
