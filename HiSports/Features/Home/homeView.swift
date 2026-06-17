@@ -29,7 +29,7 @@ struct homeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Hello, User!")
+                        Text(profile?.name.isEmpty == false ? "Hi, \(profile!.name)!" : "Hi, Athlete!")
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text(Date().formatted(
