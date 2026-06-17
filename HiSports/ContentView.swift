@@ -28,7 +28,7 @@ struct ContentView: View {
                 }
             
         }
-        // 🌟 FORCE LOGOUT SEKALI SAAT APPS DIJALANKAN
+        .toolbarBackground(.hidden, for: .tabBar) 
         .onAppear {
         }
     }

@@ -6,55 +6,49 @@
 //
 
 import SwiftUI
-import PhotosUI
 import FirebaseAuth
 
 struct MakeProfileView: View {
+    var authViewModel: AuthViewModel? = nil
+    
     @State private var name = ""
     @State private var favSports = ""
     @State private var skillLevel: SkillLevel = .beginner
-    @State private var selectedPhoto: PhotosPickerItem? = nil
-    @State private var selectedImage: UIImage? = nil
+    @State private var selectedAvatar = "avatar1"
+    @State private var showAvatarPicker = false
     @State private var isLoading = false
     @Environment(\.dismiss) private var dismiss
     
     private let sports = Sport.defaultSports
+    private let avatarOptions = ["avatar1", "avatar2", "avatar3", "avatar4", "avatar5", "avatar6"]
+    private var isEditMode: Bool { authViewModel == nil }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
                     
-                    // Foto Profile
-                    VStack(spacing: 12) {
-                        PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                            ZStack {
-                                if let image = selectedImage {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 100, height: 100)
-                                        .clipShape(Circle())
-                                } else {
-                                    Circle()
-                                        .fill(LinearGradient(colors: [.orange, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                        .frame(width: 100, height: 100)
-                                    Image(systemName: "camera.fill")
-                                        .font(.title2)
-                                        .foregroundColor(.white)
-                                }
-                            }
-                        }
-                        .onChange(of: selectedPhoto) { _, newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                   let image = UIImage(data: data) {
-                                    selectedImage = image
-                                }
+                    // Avatar
+                    VStack(spacing: 8) {
+                        ZStack(alignment: .bottomTrailing) {
+                            Image(selectedAvatar)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 90, height: 90)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.redBlood, lineWidth: 3))
+                            
+                            Button {
+                                showAvatarPicker = true
+                            } label: {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.redBlood)
+                                    .background(Circle().fill(Color.white))
                             }
                         }
                         
-                        Text("Tap untuk pilih foto")
+                        Text("Tap untuk ganti avatar")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -113,28 +107,71 @@ struct MakeProfileView: View {
                             if isLoading {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Simpan Profil").fontWeight(.bold)
+                                Text(isEditMode ? "Simpan Perubahan" : "Simpan Profil").fontWeight(.bold)
                             }
                             Spacer()
                         }
                         .padding(14)
-                        .background(Color.redBlood)
+                        .background(name.isEmpty || favSports.isEmpty ? Color.gray.opacity(0.5) : Color.redBlood)
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
-                    .disabled(isLoading)
+                    .disabled(isLoading || name.isEmpty || favSports.isEmpty)
                     
-                    // Skip
-                    Button("Lewati untuk sekarang") {
-                        dismiss()
+                    if name.isEmpty || favSports.isEmpty {
+                        Text("Lengkapi nama dan olahraga favorit dulu ya!")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
                     }
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
                 }
                 .padding(24)
             }
-            .navigationTitle("Buat Profil")
+            .navigationTitle(isEditMode ? "Edit Profil" : "Buat Profil")
             .navigationBarTitleDisplayMode(.inline)
+        }
+        // Pre-fill data saat view muncul
+        .onAppear {
+            if let profile = UserManager.shared.profile {
+                name = profile.name
+                favSports = profile.favSports
+                skillLevel = SkillLevel(rawValue: profile.skillLevel) ?? .beginner
+                selectedAvatar = profile.avatar
+            }
+        }
+        // Sheet pilihan avatar
+        .sheet(isPresented: $showAvatarPicker) {
+            VStack(spacing: 20) {
+                Text("Pilih Avatar")
+                    .font(.headline)
+                    .padding(.top, 24)
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 16) {
+                    ForEach(avatarOptions, id: \.self) { avatar in
+                        Button {
+                            selectedAvatar = avatar
+                            showAvatarPicker = false
+                        } label: {
+                            Image(avatar)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle().stroke(
+                                        selectedAvatar == avatar ? Color.redBlood : Color.gray.opacity(0.3),
+                                        lineWidth: selectedAvatar == avatar ? 3 : 1
+                                    )
+                                )
+                                .shadow(color: selectedAvatar == avatar ? Color.redBlood.opacity(0.3) : .clear, radius: 6)
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                
+                Spacer()
+            }
+            .presentationDetents([.medium])
         }
     }
     
@@ -143,21 +180,22 @@ struct MakeProfileView: View {
         isLoading = true
         
         do {
-            var photoURL: String? = nil
-            if let image = selectedImage {
-                photoURL = try await UserManager.shared.uploadPhoto(uid: uid, image: image)
-            }
-            
             let profile = UserProfile(
                 uid: uid,
                 name: name,
                 favSports: favSports,
                 skillLevel: skillLevel.rawValue,
-                photoURL: photoURL
+                avatar: selectedAvatar
             )
-            
             try await UserManager.shared.saveProfile(profile)
-            dismiss()
+            
+            if isEditMode {
+                // Mode edit → dismiss sheet
+                await MainActor.run { dismiss() }
+            } else {
+                // Mode buat baru → refresh auth → pindah ke ContentView
+                await authViewModel?.refreshProfile()
+            }
         } catch {
             print("Gagal simpan profil: \(error.localizedDescription)")
         }

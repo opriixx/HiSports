@@ -18,10 +18,14 @@ struct SearchResultView: View {
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
         }
-        return allEvents.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.sport.localizedCaseInsensitiveContains(searchText) ||
-            $0.location.localizedCaseInsensitiveContains(searchText)
+        let now = Date()
+        return allEvents.filter { event in
+            event.endTime > now &&
+            (
+                event.title.localizedCaseInsensitiveContains(searchText) ||
+                event.sport.localizedCaseInsensitiveContains(searchText) ||
+                event.location.localizedCaseInsensitiveContains(searchText)
+            )
         }
     }
 

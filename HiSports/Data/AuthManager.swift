@@ -14,7 +14,7 @@ class AuthManager {
     private init() {}
     func signUp(email: String, password: String) async throws -> AuthDataResult {
         guard !email.isEmpty, !password.isEmpty else {
-            throw NSError(domain: "AuthManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email dan password tidak boleh kosong."])
+            throw NSError(domain: "AuthManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email and password cannnot be empty."])
         }
 
         return try await Auth.auth().createUser(withEmail: email, password: password)
@@ -22,7 +22,7 @@ class AuthManager {
     
     func signIn(email: String, password: String) async throws -> AuthDataResult {
         guard !email.isEmpty, !password.isEmpty else {
-            throw NSError(domain: "AuthManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email dan password tidak boleh kosong."])
+            throw NSError(domain: "AuthManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "Email and password cannot be empty."])
         }
         
         return try await Auth.auth().signIn(withEmail: email, password: password)

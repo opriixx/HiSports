@@ -12,6 +12,7 @@ struct EventDetailView: View {
     @State private var viewModel: EventDetailViewModel
 
     let size: CGFloat = 40
+
     init(event: CloudEvent, currentUserID: String?) {
         _viewModel = State(initialValue: EventDetailViewModel(event: event, currentUserID: currentUserID))
     }
@@ -19,7 +20,6 @@ struct EventDetailView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 0) {
-
                 headerImage
 
                 VStack(spacing: 16) {
@@ -31,16 +31,13 @@ struct EventDetailView: View {
                     }
 
                     gameDetailsCard
-
-                    if !viewModel.event.equipment.isEmpty {
-                        equipmentCard
-                    }
+                    equipmentCard
 
                     if !viewModel.event.notes.isEmpty {
                         notesCard
                     }
 
-                    Spacer().frame(height: 80)
+                    Spacer().frame(height: 100)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
@@ -49,9 +46,17 @@ struct EventDetailView: View {
             .ignoresSafeArea(edges: .top)
         }
         .overlay(alignment: .bottom) {
-            actionButton
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
+            VStack(spacing: 0) {
+                actionButton
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color("Base").ignoresSafeArea(edges: .bottom))
+            }
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear {
+            Task { await viewModel.fetchParticipantProfiles() }
         }
     }
 
@@ -133,40 +138,61 @@ struct EventDetailView: View {
                     .foregroundColor(.secondary)
             }
 
-            HStack(spacing: -15) {
-                ForEach(viewModel.event.participants, id: \.self) { participantId in
-                    Circle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .background(
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.gray)
-                                .background(Circle().fill(Color("Base")))
-                        )
-                        .frame(width: size, height: size)
-                }
-
-                if viewModel.remainingSlots > 0 {
-                    ZStack {
-                        Circle()
-                            .strokeBorder(
-                                style: StrokeStyle(lineWidth: 2.5, dash: [8, 5])
-                            )
-                            .foregroundColor(Color(red: 0.9, green: 0.5, blue: 0.55).opacity(0.7))
-                        Image(systemName: "plus")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0.65, green: 0.1, blue: 0.15))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    // Peserta yang sudah join
+                    ForEach(viewModel.event.participants, id: \.self) { uid in
+                        VStack(spacing: 4) {
+                            if let profile = viewModel.participantProfiles[uid] {
+                                Image(profile.avatar)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: size, height: size)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                Text(profile.name.isEmpty ? "User" : profile.name)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                    .frame(width: size + 10)
+                            } else {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.2))
+                                        .frame(width: size, height: size)
+                                    Image(systemName: "person.fill")
+                                        .foregroundColor(.gray)
+                                }
+                                Text("User")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: size + 10)
+                            }
+                        }
                     }
-                    .frame(width: size, height: size)
 
-                    if viewModel.remainingSlots > 1 {
-                        Text("+\(viewModel.remainingSlots - 1) slot")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 20)
+                    // Slot kosong
+                    ForEach(0..<max(0, viewModel.remainingSlots), id: \.self) { _ in
+                        VStack(spacing: 4) {
+                            ZStack {
+                                Circle()
+                                    .strokeBorder(
+                                        style: StrokeStyle(lineWidth: 2, dash: [6, 4])
+                                    )
+                                    .foregroundColor(Color.redBlood.opacity(0.4))
+                                    .frame(width: size, height: size)
+                                Image(systemName: "plus")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Color.redBlood.opacity(0.6))
+                            }
+                            Text("Slot")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .frame(width: size + 10)
+                        }
                     }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(12)
         .background(Color("White-500"))
@@ -209,20 +235,31 @@ struct EventDetailView: View {
     }
 
     private var equipmentCard: some View {
-        VStack(spacing: 0) {
+        let allEquipment = Sport.defaultSports
+            .first { $0.name == viewModel.event.sport }?
+            .availableEquipments ?? []
+
+        return VStack(spacing: 0) {
             Text("Equipment")
                 .font(.callout)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 12)
 
-            ForEach(Array(viewModel.event.equipment.enumerated()), id: \.offset) { index, item in
-                detailRow(
-                    label: item,
-                    value: "Provided",
-                    valueColor: .green,
-                    isLast: index == viewModel.event.equipment.count - 1
-                )
+            if allEquipment.isEmpty {
+                Text("No equipment info")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(Array(allEquipment.enumerated()), id: \.offset) { index, item in
+                    let isProvided = viewModel.event.equipment.contains(item)
+                    detailRow(
+                        label: item,
+                        value: isProvided ? "Provided ✓" : "Bring your own",
+                        valueColor: isProvided ? .green : .secondary,
+                        isLast: index == allEquipment.count - 1
+                    )
+                }
             }
         }
         .padding(12)
@@ -298,7 +335,7 @@ struct EventDetailView: View {
             }
         }
     }
-    
+
     private func detailRow(
         label: String,
         value: String,
@@ -338,7 +375,7 @@ struct EventDetailView: View {
                 date: Date(),
                 endTime: Date().addingTimeInterval(7200),
                 price: 50000,
-                maxParticipants: 15,
+                maxParticipants: 5,
                 skillLevel: "Intermediate",
                 equipment: ["Ball"],
                 dressCode: "Sportswear",

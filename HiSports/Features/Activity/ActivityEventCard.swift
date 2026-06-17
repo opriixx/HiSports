@@ -25,7 +25,6 @@ struct ActivityEventCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Badges & Slots Row
             HStack {
                 // Badge Skill / Level
                 Text(event.skillLevel.capitalized)
@@ -33,14 +32,10 @@ struct ActivityEventCard: View {
                     .fontWeight(.bold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(
-                        event.skillLevel.lowercased() == "intermediate" ?
-                        Color.orange.opacity(0.15) : Color.green.opacity(0.15)
-                    )
+                    .background(colorSkiil(event.skillLevel))
                     .foregroundColor(event.skillLevel.lowercased() == "intermediate" ? .orange : .green)
                     .cornerRadius(6)
-                
-                // Badge Cabang Olahraga
+
                 Text(event.sport)
                     .font(.caption2)
                     .fontWeight(.bold)
@@ -51,14 +46,12 @@ struct ActivityEventCard: View {
                     .cornerRadius(6)
                 
                 Spacer()
-                
-                // Sisa Slot
+
                 Text("\(remainingSlots) slot tersisa")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
             
-            // Main Content Row (Image + Details)
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     Color.blue.opacity(0.2)
@@ -68,7 +61,6 @@ struct ActivityEventCard: View {
                 .frame(width: 65, height: 65)
                 .cornerRadius(8)
                 
-                // Detail Event Info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(event.title)
                         .font(.subheadline)
@@ -94,7 +86,6 @@ struct ActivityEventCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: "person.2")
                                 .font(.caption)
-                            // Live menghitung jumlah elemen array di dalam cloud list
                             Text("\(event.participants.count) Orang")
                                 .font(.caption)
                         }
@@ -116,4 +107,36 @@ struct ActivityEventCard: View {
         default: return "⚽️"
         }
     }
+    
+    private func colorSkiil(_ level: String) -> Color {
+        switch level.lowercased() {
+        case "beginner": return Color.green.opacity(0.15)
+        case "intermediate": return Color.orange.opacity(0.15)
+        case "expert": return Color.red.opacity(0.15)
+        default: return Color.gray.opacity(0.15)
+        }
+    }
+}
+
+#Preview {
+    ActivityEventCard(
+        event: CloudEvent(
+            id: "preview_id",
+            title: "Jakarta Basketball Cloud",
+            sport: "Basketball",
+            location: "Agora Sports Hall",
+            date: Date(),
+            endTime: Date().addingTimeInterval(7200),
+            price: 50000,
+            maxParticipants: 15,
+            skillLevel: "Beginner",
+            equipment: ["Bola"],
+            dressCode: "Sportswear",
+            notes: "Catatan dummy cloud",
+            aboutGame: "Main seru-seruan bareng anak-anak",
+            imageName: nil,
+            creatorId: "dummy_user_id",
+            participants: ["dummy_user_id"]
+        )
+    )
 }

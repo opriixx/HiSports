@@ -10,41 +10,31 @@ import FirebaseFirestore
 
 @Observable
 class EventDetailViewModel {
-    // 1. Ubah tipe data menjadi CloudEvent (Firebase Model)
     var event: CloudEvent
-    
-    // Untuk current user login, kita simpan ID-nya saja supaya gampang nge-track matching data cloud
     var currentUserID: String?
+    var participantProfiles: [String: UserProfile] = [:]  // ← pindah ke sini
 
-    // Init menerima model CloudEvent dan ID user aktif
     init(event: CloudEvent, currentUserID: String? = nil) {
         self.event = event
         self.currentUserID = currentUserID
     }
 
-    // Pengecekan apakah user aktif adalah pembuat event
     var isCreator: Bool {
         guard let userID = currentUserID else { return false }
         return event.creatorId == userID
     }
 
-    // Pengecekan participant berdasarkan Array ID String dari Cloud
     var isParticipant: Bool {
         guard let userID = currentUserID else { return false }
         return event.participants.contains(userID)
     }
 
-    // Pengecekan slot penuh berdasarkan jumlah item di array participants cloud
     var isFull: Bool {
         event.participants.count >= event.maxParticipants
     }
 
     var duration: String {
-        let diff = Calendar.current.dateComponents(
-            [.hour, .minute],
-            from: event.date,
-            to: event.endTime
-        )
+        let diff = Calendar.current.dateComponents([.hour, .minute], from: event.date, to: event.endTime)
         let h = diff.hour ?? 0
         let m = diff.minute ?? 0
         if h > 0 && m > 0 { return "\(h) Hour \(m) Minutes" }
@@ -76,7 +66,7 @@ class EventDetailViewModel {
     var remainingSlots: Int {
         event.maxParticipants - event.participants.count
     }
-    
+
     var currentParticipantsCount: Int {
         event.participants.count
     }
@@ -84,25 +74,33 @@ class EventDetailViewModel {
     func sportEmoji(for sport: String) -> String {
         Sport.defaultSports.first { $0.name == sport }?.emoji ?? "🏅"
     }
-    
+
+    // ← Pindah dari View ke sini
+    func fetchParticipantProfiles() async {
+        let db = Firestore.firestore()
+        for uid in event.participants {
+            guard participantProfiles[uid] == nil else { continue }
+            if let doc = try? await db.collection("users").document(uid).getDocument(),
+               let profile = try? doc.data(as: UserProfile.self) {
+                participantProfiles[uid] = profile
+            }
+        }
+    }
+
     func joinEvent() {
         guard let eventID = event.id, let userID = currentUserID, !isParticipant, !isFull else { return }
-
-        // UI update duluan secara lokal (Optimistic Update)
         event.participants.append(userID)
 
         Task {
             do {
-                // Tembak langsung dokumennya ke Firestore untuk nambahin ID ke array participants
-                let db = FirebaseFirestore.Firestore.firestore()
+                let db = Firestore.firestore()
                 try await db.collection("events").document(eventID).updateData([
-                    "participants": FirebaseFirestore.FieldValue.arrayUnion([userID])
+                    "participants": FieldValue.arrayUnion([userID])
                 ])
-                
+                await fetchParticipantProfiles() // ← refresh setelah join
                 NotificationManager.shared.sendJoinEventNotification(eventName: event.title)
-                
             } catch {
-                print("Gagal join event di server: \(error.localizedDescription)")
+                print("Gagal join: \(error.localizedDescription)")
                 await MainActor.run {
                     event.participants.removeAll { $0 == userID }
                 }
@@ -110,24 +108,19 @@ class EventDetailViewModel {
         }
     }
 
-    // Fungsi Leave Event versi Cloud Firestore Async-Throws
     func leaveEvent() {
         guard let eventID = event.id, let userID = currentUserID, isParticipant else { return }
-
-        // UI update duluan secara lokal
         event.participants.removeAll { $0 == userID }
 
         Task {
             do {
-                let db = FirebaseFirestore.Firestore.firestore()
+                let db = Firestore.firestore()
                 try await db.collection("events").document(eventID).updateData([
-                    "participants": FirebaseFirestore.FieldValue.arrayRemove([userID])
+                    "participants": FieldValue.arrayRemove([userID])
                 ])
-                
                 NotificationManager.shared.sendLeaveEventNotification(eventName: event.title)
-                
             } catch {
-                print("Gagal leave event di server: \(error.localizedDescription)")
+                print("Gagal leave: \(error.localizedDescription)")
                 await MainActor.run {
                     event.participants.append(userID)
                 }

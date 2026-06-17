@@ -18,42 +18,24 @@ struct profileView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    
-                    // Header
                     HStack(spacing: 16) {
-                        // Foto Profile
-                        AsyncImage(url: URL(string: profile?.photoURL ?? "")) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            ZStack {
-                                Circle()
-                                    .fill(LinearGradient(colors: [.orange, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                Text(profile?.favSports.prefix(1).uppercased() ?? "🏅")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
+                        Image(profile?.avatar ?? "avatar1")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.redBlood.opacity(0.3), lineWidth: 2))
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(profile?.name.isEmpty == false ? "Hi, \(profile!.name)!" : "Hi, Athlete!")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            Text(profile?.skillLevel ?? "Beginner")
+                            Text(profile?.skillLevel ?? "-")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                         
                         Spacer()
-                        
-                        Button {
-                            showMakeProfile = true
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.redBlood)
-                        }
                     }
                     .padding(.horizontal)
                     .padding(.top, 12)
@@ -88,6 +70,7 @@ struct profileView: View {
                             }
                             Divider().padding(.leading)
                             settingRow(title: "Logout", icon: "rectangle.portrait.and.arrow.right", color: .red) {
+                                userManager.clearProfile()
                                 try? Auth.auth().signOut()
                             }
                         }

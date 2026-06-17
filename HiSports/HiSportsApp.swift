@@ -5,11 +5,6 @@
 //  Created by Muhammad Ridwan Novriansyah on 10/06/26.
 //
 
-//
-//  HiSportsApp.swift
-//  HiSports
-//
-
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
@@ -35,8 +30,15 @@ struct HiSportsApp: App {
         WindowGroup {
             Group {
                 if let vm = authViewModel {
-                    if vm.user != nil {
+                    if vm.isCheckingProfile {
+                        ProgressView()
+                    } else if vm.user != nil && vm.hasProfile {
                         ContentView()
+                    } else if vm.user != nil && !vm.hasProfile {
+                        NavigationStack {
+                            MakeProfileView(authViewModel: vm)
+                                .navigationBarBackButtonHidden(true)
+                        }
                     } else {
                         NavigationStack { LoginView() }
                     }

@@ -80,7 +80,7 @@ struct CloudEventCardView: View {
             .padding(.init(top: 0, leading: 12, bottom: 12, trailing: 12))
             
         }
-        .background(Color("Base"))
+        .background(Color("White-500"))
         .cornerRadius(24)
     }
 }

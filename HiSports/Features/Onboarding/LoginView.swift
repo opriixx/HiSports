@@ -16,16 +16,19 @@ struct LoginView: View {
     
     var body: some View {
         VStack(spacing: 24) {
+            VStack{
+                Image("HiSportsLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 100)
+                Text("HiSPorts")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }
+            
             Spacer()
             
-            // Logo
-            Image("HiSportsLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 80)
-            
             VStack(spacing: 16) {
-                // Email Field
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Email")
                         .font(.footnote).fontWeight(.semibold)
@@ -35,8 +38,6 @@ struct LoginView: View {
                         .padding(12)
                         .overlay(RoundedRectangle(cornerRadius: 50).stroke(Color.gray, lineWidth: 0.5))
                 }
-                
-                // Password Field
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Password")
                         .font(.footnote).fontWeight(.semibold)
@@ -50,7 +51,6 @@ struct LoginView: View {
                         .font(.caption).foregroundColor(.red)
                 }
                 
-                // Login Button
                 Button(action: {
                     Task { await loginUser() }
                 }) {
@@ -69,7 +69,6 @@ struct LoginView: View {
                 }
                 .disabled(email.isEmpty || password.isEmpty || isLoading)
                 
-                // Link ke Register
                 NavigationLink("Belum punya akun? Daftar di sini", destination: registerView())
                     .font(.footnote)
                     .foregroundColor(.blue)
@@ -85,10 +84,13 @@ struct LoginView: View {
         
         do {
             _ = try await AuthManager.shared.signIn(email: email, password: password)
-            // Gak perlu navigasi manual! AuthViewModel di App akan otomatis ganti ke ContentView
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription
         }
     }
+}
+
+#Preview{
+    LoginView()
 }

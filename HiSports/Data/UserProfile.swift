@@ -13,15 +13,15 @@ struct UserProfile: Codable {
     var name: String
     var favSports: String
     var skillLevel: String
-    var photoURL: String?
+    var avatar: String
     var totalMatches: Int
     
-    init(uid: String, name: String = "", favSports: String = "", skillLevel: String = "Beginner", photoURL: String? = nil, totalMatches: Int = 0) {
+    init(uid: String, name: String = "", favSports: String = "", skillLevel: String = "Beginner", avatar: String = "avatar1", totalMatches: Int = 0) {
         self.uid = uid
         self.name = name
         self.favSports = favSports
         self.skillLevel = skillLevel
-        self.photoURL = photoURL
+        self.avatar = avatar
         self.totalMatches = totalMatches
     }
 }

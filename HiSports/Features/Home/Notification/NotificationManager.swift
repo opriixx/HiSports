@@ -5,11 +5,6 @@
 //  Created by Muhammad Ridwan Novriansyah on 15/06/26.
 //
 
-//
-//  NotificationManager.swift
-//  HiSports
-//
-
 import Foundation
 import UserNotifications
 

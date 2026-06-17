@@ -206,7 +206,7 @@ struct EditEventView: View {
                         .foregroundColor(.red)
                 }
             }
-
+            
             Button(action: saveChanges) {
                 HStack {
                     Spacer()
@@ -217,12 +217,18 @@ struct EditEventView: View {
                     } else {
                         Text("Save Changes")
                             .fontWeight(.bold)
+                            .foregroundColor(.white)
                     }
 
                     Spacer()
                 }
+                .padding()
+                .background(isFormValid ? Color.red : Color(.systemGray4))
+                .cornerRadius(50)
             }
-            .disabled(isLoading || title.isEmpty || sport.isEmpty || location.isEmpty)
+            .disabled(isLoading || !isFormValid)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
         }
         .navigationTitle("Edit Event")
         .navigationBarTitleDisplayMode(.inline)
@@ -233,7 +239,23 @@ struct EditEventView: View {
         }
     }
 
+    private var isFormValid: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !sport.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        price >= 0 &&
+        maxParticipants >= max(2, event.participants.count) &&
+        notes.count <= notesCharacterLimit &&
+        aboutGame.count <= aboutGameCharacterLimit &&
+        endTime > date
+    }
+
     private func saveChanges() {
+        guard isFormValid else {
+            errorMessage = "Mohon lengkapi data event dengan benar."
+            return
+        }
+
         guard let eventId = event.id else {
             errorMessage = "Event ID tidak ditemukan."
             return

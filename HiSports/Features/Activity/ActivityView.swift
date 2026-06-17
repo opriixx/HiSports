@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import FirebaseFirestore // 🌟 Ditambahkan untuk mengambil real-time event dari Cloud
+import FirebaseFirestore
 import FirebaseAuth
 
 enum ActivityTab: String, CaseIterable {
@@ -23,26 +23,21 @@ struct ActivityView: View {
     private var currentUserID: String {
         Auth.auth().currentUser?.uid ?? ""
     }
-    
-    // Filter cloud event berdasarkan tab yang dipilih
     private var filteredEvents: [CloudEvent] {
         let now = Date()
         
         switch selectedTab {
         case .yourActivity:
-            // Event yang akan datang DAN ID user terdaftar di dalam array participants cloud
             return allEvents.filter { event in
                 event.date >= now && event.participants.contains(currentUserID)
             }
             
         case .inGame:
-            // Event yang sedang berlangsung saat ini
             return allEvents.filter { event in
                 now >= event.date && now <= event.endTime
             }
             
         case .history:
-            // Event yang sudah selesai lewat dari endTime
             return allEvents.filter { event in
                 event.endTime < now
             }
@@ -51,18 +46,30 @@ struct ActivityView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Header Title
+            VStack(spacing: 12) {
                 HStack {
                     Text("Activity")
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
+                    
+                    NavigationLink {
+                        CreateEventView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Create")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal,16)
+                        .padding(.vertical, 8)
+                        .background(.red, in: RoundedRectangle(cornerRadius: 50))
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
                 
-                // Custom Segmented Picker
                 HStack(spacing: 4) {
                     ForEach(ActivityTab.allCases, id: \.self) { tab in
                         Text(tab.rawValue)
@@ -86,7 +93,6 @@ struct ActivityView: View {
                 .padding(.horizontal)
                 .padding(.top, 10)
                 
-                // List Events
                 if filteredEvents.isEmpty {
                     ContentUnavailableView(
                         "No Events Found",
@@ -97,7 +103,6 @@ struct ActivityView: View {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(filteredEvents) { event in
-                                // 🌟 Oper data CloudEvent dan ID user aktif ke halaman Detail baru
                                 NavigationLink(destination: EventDetailView(event: event, currentUserID: currentUserID)) {
                                     ActivityEventCard(event: event)
                                 }
@@ -110,7 +115,7 @@ struct ActivityView: View {
             }
             .background(Color("Base"))
         }
-        // 🌟 Sinkronisasi real-time snapshot dari Firestore collection "events"
+
         .onAppear {
             self.listenerRegistration?.remove()
             
@@ -134,4 +139,8 @@ struct ActivityView: View {
             self.listenerRegistration?.remove()
         }
     }
+}
+
+#Preview {
+    ActivityView()
 }

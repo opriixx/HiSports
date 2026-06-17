@@ -11,17 +11,18 @@ import FirebaseAuth
 struct homeView: View {
     @State private var selectedSports: [String] = []
     @State private var showSearch = false
-    
-    // 🌟 Ganti @Query SwiftData dengan State Array khusus CloudEvent
     @State private var listEvent: [CloudEvent] = []
     @State private var listenerRegistration: ListenerRegistration? = nil
-
-    // Filter event disesuaikan dengan tipe CloudEvent
+    @State private var userManager = UserManager.shared
+    
+    private var profile: UserProfile? { userManager.profile }
+    
     private var filteredEvents: [CloudEvent] {
-        guard !selectedSports.isEmpty else { return listEvent }
-        return listEvent.filter { event in
-            selectedSports.contains(event.sport)
-        }
+        let now = Date()
+        let activeEvents = listEvent.filter { $0.endTime > now }
+        
+        guard !selectedSports.isEmpty else { return activeEvents }
+        return activeEvents.filter { selectedSports.contains($0.sport) }
     }
     
     var body: some View {
@@ -100,54 +101,35 @@ struct homeView: View {
                         }
                     }
                 }
-
-                NavigationLink {
-                    CreateEventView()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "plus.circle.fill")
-                        Text("Add Event")
-                        Spacer()
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(.red, in: RoundedRectangle(cornerRadius: 12))
-                }
             }
             .padding(20)
+            .background(.base)
             .navigationDestination(isPresented: $showSearch) {
                 SearchResultView()
             }
         }
-        // 🌟 BAGIAN PENTING: Koneksi Real-time ke Firebase Firestore
         .onAppear {
-            // Bersihkan listener lama biar gak terjadi memory leak
-            self.listenerRegistration?.remove()
+            // Fetch profile setiap kali Home muncul
+            if let uid = Auth.auth().currentUser?.uid {
+                Task {
+                    await userManager.fetchProfile(uid: uid)
+                }
+            }
             
-            // Dengerin data collection 'events' dari server Firestore secara live
+            // Firestore listener
+            self.listenerRegistration?.remove()
             let db = Firestore.firestore()
             self.listenerRegistration = db.collection("events")
-                .order(by: "date", descending: false) // Urutkan berdasarkan tanggal terdekat
+                .order(by: "date", descending: false)
                 .addSnapshotListener { querySnapshot, error in
                     if let error = error {
-                        print("Error nembak data Firestore: \(error.localizedDescription)")
+                        print("Error: \(error.localizedDescription)")
                         return
                     }
-                    
-                    guard let documents = querySnapshot?.documents else {
-                        print("Dokumen kosong")
-                        return
-                    }
-                    
-                    // Mapping data dari JSON Firestore ke Model CloudEvent Swift
-                    self.listEvent = documents.compactMap { doc -> CloudEvent? in
-                        try? doc.data(as: CloudEvent.self)
-                    }
+                    guard let documents = querySnapshot?.documents else { return }
+                    self.listEvent = documents.compactMap { try? $0.data(as: CloudEvent.self) }
                 }
         }
-        // Matiin satpam listener pas pindah page demi menghemat kuota Firebase
         .onDisappear {
             self.listenerRegistration?.remove()
         }

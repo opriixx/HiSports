@@ -34,7 +34,9 @@ struct CreateEventView: View {
                         Text("\(sport.emoji) \(sport.name)").tag(sport.name)
                     }
                 }
-
+            }
+            
+            Section(header: Text("Price/pax")){
                 TextField("Price", value: $viewModel.price, format: .currency(code: "IDR"))
                     .keyboardType(.numberPad)
             }
@@ -138,7 +140,6 @@ struct CreateEventView: View {
 
             Button(action: {
                 Task {
-                    // Cukup panggil fungsi ini, jika return true (sukses), dismiss view.
                     let isSuccess = await viewModel.actionSaveEvent()
                     if isSuccess {
                         dismiss()
@@ -154,8 +155,13 @@ struct CreateEventView: View {
                     }
                     Spacer()
                 }
+                .padding()
+                .background(viewModel.isSaveDisabled ? Color(.systemGray4) : Color.red)
             }
-            .disabled(viewModel.isSaveDisabled) // Logika disabled dipisah ke ViewModel
+            .disabled(viewModel.isSaveDisabled)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+            
         }
         .navigationTitle("Create Event")
         .navigationBarTitleDisplayMode(.inline)

@@ -13,7 +13,6 @@ struct registerView: View {
     @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorMessage = ""
-    @State private var showMakeProfile = false
     
     var body: some View {
         VStack(spacing: 24) {
@@ -93,14 +92,15 @@ struct registerView: View {
                 .padding(.top, 10)
             }
             
+            NavigationLink("Sudah punya akun? Masuk di sini", destination: LoginView())
+                .font(.footnote)
+                .foregroundColor(.blue)
+            
             Spacer()
         }
         .padding(24)
-        // Setelah register → MakeProfile dulu, bisa skip
-        .navigationDestination(isPresented: $showMakeProfile) {
-            MakeProfileView()
-                .navigationBarBackButtonHidden(true)
-        }
+        // Tidak perlu navigationDestination lagi!
+        // HiSportsApp yang handle routing ke MakeProfileView
     }
     
     private func registerUser() async {
@@ -114,9 +114,9 @@ struct registerView: View {
         
         do {
             _ = try await AuthManager.shared.signUp(email: email, password: password)
-            print("Registration Success!")
+            // Tidak perlu navigate manual!
+            // AuthViewModel otomatis detect user baru → hasProfile = false → MakeProfileView
             isLoading = false
-            showMakeProfile = true  // → ke MakeProfileView
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription

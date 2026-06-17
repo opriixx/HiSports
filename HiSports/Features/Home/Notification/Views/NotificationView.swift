@@ -5,11 +5,6 @@
 //  Created by Muhammad Ridwan Novriansyah on 14/06/26.
 //
 
-//
-//  NotificationView.swift
-//  HiSports
-//
-
 import SwiftUI
 
 struct NotificationView: View {
@@ -18,22 +13,6 @@ struct NotificationView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "chevron.left")
-                }
-                Text("Notifications")
-                    .font(.headline)
-                Spacer()
-                if !manager.notifications.isEmpty {
-                    Button("Tandai Semua") {
-                        manager.notifications.forEach { $0.isRead = true }
-                    }
-                    .font(.caption)
-                }
-            }
-            .padding()
-
             if manager.notifications.isEmpty {
                 ContentUnavailableView(
                     "No Notifications",
@@ -55,6 +34,15 @@ struct NotificationView: View {
                     }
                 }
                 .listStyle(.plain)
+            }
+        }
+        .navigationTitle("Notifikasi")
+        .toolbar {
+            if !manager.notifications.isEmpty {
+                Button("Tandai Semua") {
+                    manager.notifications.forEach { $0.isRead = true }
+                }
+                .font(.caption)
             }
         }
     }

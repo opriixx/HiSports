@@ -2,7 +2,7 @@ import Foundation
 import FirebaseFirestore
 
 struct CloudEvent: Codable, Identifiable {
-    @DocumentID var id: String?          // ID otomatis dari Document Firebase
+    @DocumentID var id: String?
     var title: String
     var sport: String
     var location: String
@@ -15,10 +15,10 @@ struct CloudEvent: Codable, Identifiable {
     var dressCode: String
     var notes: String
     var aboutGame: String
-    var imageName: String? = nil         // Set default nil di sini wan
+    var imageName: String? = nil
     
     var creatorId: String
-    var participants: [String] = []     // Set default array kosong di sini
+    var participants: [String] = []    
     
     var currentParticipantsCount: Int {
         return participants.count
