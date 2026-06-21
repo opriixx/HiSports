@@ -16,7 +16,6 @@ struct ContentView: View {
                     Label("Home", systemImage: "house.fill")
                 }
             
-            // 🌟 Ikon diubah jadi figure.run biar gak kembar sama Profile
             ActivityView()
                 .tabItem {
                     Label("Activity", systemImage: "figure.run")
@@ -26,9 +25,9 @@ struct ContentView: View {
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
                 }
-            
         }
-        .toolbarBackground(.hidden, for: .tabBar) 
+        .tint(.red)
+        .toolbarBackground(.hidden, for: .tabBar)
         .onAppear {
         }
     }

@@ -26,7 +26,6 @@ struct ActivityEventCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                // Badge Skill / Level
                 Text(event.skillLevel.capitalized)
                     .font(.caption2)
                     .fontWeight(.bold)
@@ -41,8 +40,8 @@ struct ActivityEventCard: View {
                     .fontWeight(.bold)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.green.opacity(0.1))
-                    .foregroundColor(.green)
+                    .background(Color("red-blood").opacity(0.1))
+                    .foregroundColor(Color("red-blood"))
                     .cornerRadius(6)
                 
                 Spacer()

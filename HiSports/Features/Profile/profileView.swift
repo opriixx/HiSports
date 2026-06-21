@@ -127,3 +127,8 @@ struct profileView: View {
         }
     }
 }
+
+
+#Preview {
+    profileView()
+}

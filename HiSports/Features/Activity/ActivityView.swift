@@ -75,11 +75,13 @@ struct ActivityView: View {
                         Text(tab.rawValue)
                             .font(.subheadline)
                             .fontWeight(.medium)
+                            .foregroundColor(selectedTab == tab ? .primary : .secondary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
-                            .background(selectedTab == tab ? Color.white : Color.clear)
+                            .background(
+                                selectedTab == tab ? Color("White-500") : Color.clear
+                            )
                             .clipShape(Capsule())
-                            .shadow(color: selectedTab == tab ? .black.opacity(0.05) : .clear, radius: 2, x: 0, y: 1)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     selectedTab = tab
@@ -88,7 +90,7 @@ struct ActivityView: View {
                     }
                 }
                 .padding(4)
-                .background(Color(.systemGroupedBackground))
+                .background(.ultraThinMaterial)
                 .clipShape(Capsule())
                 .padding(.horizontal)
                 .padding(.top, 10)
